@@ -1,0 +1,34 @@
+{
+  "model": {
+    "units": 100,
+    "batch_size": 30,
+    "epochs": 1000,
+    "optimizer": "adam",
+    "loss": "mae",
+    "dropout": 0.1,
+    "window_length": 12,
+    "early_stopping_patience": 200
+  },
+  "lottery": {
+    "min_number": 1,
+    "max_number": 49,
+    "numbers_to_predict": 5,
+    "min_chance": 1,
+    "max_chance": 10
+  },
+  "scraping": {
+    "url": "http://loto.akroweb.fr/loto-historique-tirages/",
+    "timeout": 10,
+    "delay": 2
+  },
+  "api": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "debug": true,
+    "cors_enabled": true
+  },
+  "paths": {
+    "model_file": "best_model.keras",
+    "static_folder": "static"
+  }
+}

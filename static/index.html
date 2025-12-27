@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loto AI Predictor - Système d'Analyse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --accent: #0ea5e9;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Warning Banner */
+        .warning-banner {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 40px auto;
+            max-width: 900px;
+        }
+
+        .warning-banner h3 {
+            color: var(--danger);
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .warning-banner p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        /* Grid Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Button */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: var(--primary);
+        }
+
+        /* Tech Info */
+        .tech-info {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .tech-info h4 {
+            color: var(--accent);
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .tech-info ul {
+            list-style: none;
+        }
+
+        .tech-info li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .tech-info li:last-child {
+            border-bottom: none;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: var(--success);
+            color: white;
+            margin-top: 20px;
+        }
+
+        /* Prediction Zone */
+        .prediction-zone {
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .numbers-display {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 32px 0;
+        }
+
+        .number-ball {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .chance-ball {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Stats */
+        .prediction-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+            width: 100%;
+        }
+
+        .stat-item {
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+
+        /* Loading */
+        .loading {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* History */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 10px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        .history-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s ease;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+        }
+
+        .history-numbers {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .mini-ball {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: white;
+        }
+
+        .mini-chance {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+        }
+
+        .history-date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* Placeholder */
+        .placeholder {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .placeholder p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(14, 165, 233, 0.1);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .info-box p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .number-ball {
+                width: 64px;
+                height: 64px;
+                font-size: 1.5rem;
+            }
+
+            .prediction-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Simple fade in */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>Loto AI Predictor</h1>
+            <p class="subtitle">Système d'analyse par intelligence artificielle LSTM</p>
+        </header>
+
+        <!-- Warning Banner -->
+        <div class="warning-banner">
+            <h3>Avertissement Important</h3>
+            <p>
+                <strong>Ce système utilise l'intelligence artificielle pour analyser les patterns historiques du Loto.</strong>
+                Cependant, les tirages de loterie sont par nature aléatoires et imprévisibles. 
+                Les prédictions générées sont basées sur des modèles statistiques et ne garantissent aucun gain.
+                <br><br>
+                <strong>Probabilité réelle de gagner : 1 sur 1 906 884</strong>
+            </p>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Control Panel -->
+            <div>
+                <div class="card">
+                    <h2 class="card-title">Contrôles</h2>
+                    <div class="control-panel">
+                        <button class="btn" id="predictBtn" onclick="generatePrediction()">
+                            Générer Prédiction
+                        </button>
+                        <button class="btn btn-secondary" id="historyBtn" onclick="loadHistory()">
+                            Historique
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadStats()">
+                            Statistiques
+                        </button>
+                    </div>
+
+                    <!-- Tech Info -->
+                    <div class="tech-info">
+                        <h4>Architecture Technique</h4>
+                        <ul>
+                            <li>LSTM Neural Network</li>
+                            <li>22 Features Engineering</li>
+                            <li>StandardScaler Normalization</li>
+                            <li>Window: 12 Tirages</li>
+                            <li>Early Stopping</li>
+                            <li>Real-time Scraping</li>
+                        </ul>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <span class="status-badge">Système Actif</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prediction Zone -->
+            <div>
+                <div class="card prediction-zone">
+                    <h2 class="card-title">Prédictions</h2>
+                    <div id="predictionContent">
+                        <div class="placeholder">
+                            <p>Cliquez sur "Générer Prédiction" pour lancer l'analyse<br>par réseau de neurones LSTM</p>
+                            <p style="margin-top: 20px; font-size: 0.9rem; color: var(--accent);">
+                                Les numéros seront calculés pour le prochain tirage<br>
+                                (Lundi, Mercredi ou Samedi à 20h30)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="card" style="margin-top: 24px;" id="historyCard">
+                    <h2 class="card-title">Historique des Tirages</h2>
+                    <div id="historyContent">
+                        <div class="placeholder">
+                            <p>Chargez l'historique pour voir les 20 derniers tirages officiels</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>Loto AI Predictor - Système d'analyse par intelligence artificielle</p>
+            <p style="margin-top: 8px; font-size: 0.85rem;">
+                TensorFlow/Keras - LSTM Architecture - Python Flask API
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        // Fonction pour calculer le prochain tirage du Loto
+        // Le Loto a lieu les lundis, mercredis et samedis à 20h30
+        function getNextDrawDate() {
+            const now = new Date();
+            const currentDay = now.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            // Jours de tirage : 1 (Lundi), 3 (Mercredi), 6 (Samedi)
+            const drawDays = [1, 3, 6];
+            const drawTime = 20.5; // 20h30
+            
+            let nextDraw = new Date(now);
+            let daysToAdd = 0;
+            
+            // Si on est un jour de tirage mais avant 20h30
+            if (drawDays.includes(currentDay)) {
+                const currentTime = currentHour + currentMinute / 60;
+                if (currentTime < drawTime) {
+                    // Le tirage est aujourd'hui
+                    daysToAdd = 0;
+                } else {
+                    // Le tirage est déjà passé, chercher le prochain
+                    daysToAdd = getNextDrawDays(currentDay, drawDays);
+                }
+            } else {
+                // Pas un jour de tirage, chercher le prochain
+                daysToAdd = getNextDrawDays(currentDay, drawDays);
+            }
+            
+            nextDraw.setDate(nextDraw.getDate() + daysToAdd);
+            nextDraw.setHours(20, 30, 0, 0);
+            
+            const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+            
+            return {
+                date: `${dayNames[nextDraw.getDay()]} ${nextDraw.getDate()} ${months[nextDraw.getMonth()]} ${nextDraw.getFullYear()}`,
+                day: dayNames[nextDraw.getDay()]
+            };
+        }
+        
+        function getNextDrawDays(currentDay, drawDays) {
+            for (let day of drawDays) {
+                if (day > currentDay) {
+                    return day - currentDay;
+                }
+            }
+            // Si aucun jour trouvé cette semaine, prendre le premier de la semaine prochaine
+            return 7 - currentDay + drawDays[0];
+        }
+
+        // Generate Prediction
+        async function generatePrediction() {
+            const btn = document.getElementById('predictBtn');
+            const content = document.getElementById('predictionContent');
+
+            btn.disabled = true;
+            btn.textContent = 'Analyse en cours...';
+
+            content.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 24px; color: var(--text-secondary);">
+                        Analyse des données historiques<br>
+                        Application du modèle LSTM<br>
+                        Génération des prédictions
+                    </p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ retrain: false })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayPrediction(data);
+                } else {
+                    throw new Error(data.error || 'Erreur lors de la prédiction');
+                }
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="placeholder">
+                        <p style="color: var(--danger);">Erreur: ${error.message}</p>
+                        <p style="margin-top: 12px; font-size: 0.9rem;">
+                            Vérifiez que le serveur Flask est actif sur le port 5000
+                        </p>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Générer Prédiction';
+            }
+        }
+
+        // Display Prediction
+        function displayPrediction(data) {
+            const content = document.getElementById('predictionContent');
+            
+            const numbersHTML = data.predictions.map(num => `
+                <div class="number-ball">${num}</div>
+            `).join('');
+
+            const statsHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${data.stats.pairs}</div>
+                    <div class="stat-label">Pairs</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.stats.impairs}</div>
+                    <div class="stat-label">Impairs</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.stats.bas}</div>
+                    <div class="stat-label">Bas (1-24)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.stats.haut}</div>
+                    <div class="stat-label">Haut (25-49)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.stats.somme}</div>
+                    <div class="stat-label">Somme</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.stats.moyenne}</div>
+                    <div class="stat-label">Moyenne</div>
+                </div>
+            `;
+
+            // Calculer le prochain tirage (Lundi, Mercredi, Samedi à 20h30)
+            const nextDraw = getNextDrawDate();
+            
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(14, 165, 233, 0.2)); border: 2px solid var(--primary); border-radius: 12px; padding: 20px; margin-bottom: 32px; text-align: center;">
+                        <h3 style="color: var(--primary); font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">
+                            À utiliser pour le tirage du :
+                        </h3>
+                        <p style="font-size: 1.8rem; font-weight: 900; color: var(--text-primary); margin-bottom: 4px;">
+                            ${nextDraw.date}
+                        </p>
+                        <p style="font-size: 1rem; color: var(--text-secondary);">
+                            ${nextDraw.day} à 20h30
+                        </p>
+                    </div>
+
+                    <h3 style="text-align: center; color: var(--primary); margin-bottom: 24px; font-size: 1.3rem; font-weight: 700;">
+                        Numéros Prédits
+                    </h3>
+                    <div class="numbers-display">
+                        ${numbersHTML}
+                        <div class="number-ball chance-ball">${data.chance}</div>
+                    </div>
+
+                    <div class="info-box">
+                        <p>Prédiction générée le ${new Date(data.timestamp).toLocaleString('fr-FR')}</p>
+                        <p style="margin-top: 6px;">
+                            Modèle: ${data.model_status === 'trained' ? 'Entraîné' : 'Chargé depuis cache'}
+                        </p>
+                    </div>
+
+                    <h4 style="text-align: center; color: var(--text-primary); margin-top: 32px; margin-bottom: 20px; font-size: 1.2rem; font-weight: 700;">
+                        Analyse Statistique
+                    </h4>
+                    <div class="prediction-stats">
+                        ${statsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load History
+        async function loadHistory() {
+            const content = document.getElementById('historyContent');
+            const btn = document.getElementById('historyBtn');
+
+            btn.disabled = true;
+            content.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 20px; color: var(--text-secondary);">Chargement...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_URL}/history`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayHistory(data.history);
+                } else {
+                    throw new Error(data.error || 'Erreur');
+                }
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="placeholder">
+                        <p style="color: var(--danger);">Erreur: ${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Display History
+        function displayHistory(history) {
+            const content = document.getElementById('historyContent');
+            
+            const historyHTML = history.map(item => {
+                const numbersHTML = item.numbers.map(num => `
+                    <div class="mini-ball">${num}</div>
+                `).join('');
+
+                return `
+                    <div class="history-item">
+                        <div class="history-numbers">
+                            ${numbersHTML}
+                            <div class="mini-ball mini-chance">${item.chance}</div>
+                        </div>
+                        <div class="history-date">${item.date}</div>
+                    </div>
+                `;
+            }).join('');
+
+            content.innerHTML = `<div class="history-list fade-in">${historyHTML}</div>`;
+        }
+
+        // Load Stats
+        async function loadStats() {
+            alert('Fonctionnalité en développement');
+        }
+
+        // Console message
+        console.log('Loto AI Predictor - Système LSTM actif');
+        console.log('Les prédictions sont basées sur l\'analyse statistique');
+    </script>
+</body>
+</html>
